@@ -1,7 +1,6 @@
-
 //
 // Scene.h
-
+//
 #pragma once
 
 #include <GUObject.h>
@@ -10,7 +9,6 @@
 #include <Triangle.h>
 #include <Quad.h>
 #include <Camera.h>
-
 #include <CBufferStructures.h>
 #include <Material.h>
 
@@ -23,10 +21,6 @@ class LookAtCamera;
 class Texture;
 class Effect;
 
-
-
-
-
 class Scene : public GUObject {
 
 	HINSTANCE								hInst = NULL;
@@ -36,11 +30,10 @@ class Scene : public GUObject {
 	DXSystem								*dx = nullptr;
 
 	D3D11_VIEWPORT							viewport;
+	D3D11_VIEWPORT							mCubeMapViewport;
 
 	Material								mattWhite;
 	Material								glossWhite;
-
-
 
 	// Direct3D scene textures and resource views
 
@@ -85,10 +78,6 @@ class Scene : public GUObject {
 	LookAtCamera							*mainCamera = nullptr;
 	Camera									mCubeMapCamera[6];
 
-	//Viewport
-	D3D11_VIEWPORT							mCubeMapViewport;
-
-
 	//
 	// Private interface
 	//
@@ -98,7 +87,6 @@ class Scene : public GUObject {
 
 	// Return TRUE if the window is in a minimised state, FALSE otherwise
 	BOOL isMinimised();
-
 
 public:
 
@@ -124,7 +112,6 @@ public:
 	void startClock();
 	void stopClock();
 	void reportTimingData();
-
 
 	//
 	// Event handling methods
@@ -157,7 +144,7 @@ public:
 	HRESULT updateScene(ID3D11DeviceContext *context);
 	HRESULT renderScene();
 
-	void DrawScene(ID3D11DeviceContext *context);
+	HRESULT drawCubeMaps();
 
 
 

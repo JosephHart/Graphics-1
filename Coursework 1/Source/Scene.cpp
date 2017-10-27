@@ -25,11 +25,6 @@ using namespace std;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
-
-
-
-
-
 // Load the Compiled Shader Object (CSO) file 'filename' and return the bytecode in the blob object **bytecode.  This is used to create shader interfaces that require class linkage interfaces.
 // Taken from DXShaderFactory by Paul Angel. This function has been included here for clarity.
 uint32_t DXLoadCSO(const char *filename, char **bytecode)
@@ -497,7 +492,8 @@ HRESULT Scene::initialiseSceneResources() {
 	cubeTexDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS |
 		D3D11_RESOURCE_MISC_TEXTURECUBE;
 	ID3D11Texture2D* cubeTex = 0;
-	HRESULT hr(device->CreateTexture2D(&cubeTexDesc, 0, &cubeTex));
+	HRESULT hr(device->CreateTexture2D(&cubeTexDesc, 0, &cubeTex));
+
 	//
 	// Create a render target view to each cube map face
 	// (i.e., each element in the texture array).
@@ -513,7 +509,9 @@ HRESULT Scene::initialiseSceneResources() {
 		// Create a render target view to the ith element.
 		cubeRtvDesc.Texture2DArray.FirstArraySlice = i;
 		hr = (device->CreateRenderTargetView(cubeTex, &cubeRtvDesc, &mDynamicCubeMapRTV[i]));
-	}	//
+	}
+
+	//
 	// Create a shader resource view to the cube map.
 	//
 	D3D11_SHADER_RESOURCE_VIEW_DESC cubeSrvDesc;
@@ -522,7 +520,9 @@ HRESULT Scene::initialiseSceneResources() {
 	cubeSrvDesc.TextureCube.MostDetailedMip = 0;
 	cubeSrvDesc.TextureCube.MipLevels = -1;
 	hr = (device->CreateShaderResourceView(
-		cubeTex, &cubeSrvDesc, &mDynamicCubeMapSRV));
+		cubeTex, &cubeSrvDesc, &mDynamicCubeMapSRV));
+
+
 	D3D11_TEXTURE2D_DESC depthTexDesc;
 	depthTexDesc.Width = CubeMapSize;
 	depthTexDesc.Height = CubeMapSize;
@@ -544,17 +544,16 @@ HRESULT Scene::initialiseSceneResources() {
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
 	hr = (device->CreateDepthStencilView(depthTex,
-		&dsvDesc, &mDynamicCubeMapDSV));
+		&dsvDesc, &mDynamicCubeMapDSV));
+
 	//Setup viewport
 	mCubeMapViewport.TopLeftX = 0.0f;
 	mCubeMapViewport.TopLeftY = 0.0f;
 	mCubeMapViewport.Width = (float)CubeMapSize;
 	mCubeMapViewport.Height = (float)CubeMapSize;
 	mCubeMapViewport.MinDepth = 0.0f;
-	mCubeMapViewport.MaxDepth = 1.0f;	
-
-
-
+	mCubeMapViewport.MaxDepth = 1.0f;
+	
 
 
 	//////////////////////////////////////////////////////// Tutorial Begin
@@ -609,17 +608,12 @@ HRESULT Scene::initialiseSceneResources() {
 
 	// Setup objects for the programmable (shader) stages of the pipeline
 
-
 	perPixelLightingEffect = new Effect(device, "Shaders\\cso\\per_pixel_lighting_vs.cso", "Shaders\\cso\\per_pixel_lighting_ps.cso", extVertexDesc, ARRAYSIZE(extVertexDesc));
 
 	skyBoxEffect = new Effect(device, "Shaders\\cso\\sky_box_vs.cso", "Shaders\\cso\\sky_box_ps.cso", extVertexDesc, ARRAYSIZE(extVertexDesc));
 	//basicEffect = new Effect(device, "Shaders\\cso\\basic_colour_vs.cso", "Shaders\\cso\\basic_colour_ps.cso", "Shaders\\cso\\basic_colour_gs.cso", basicVertexDesc, ARRAYSIZE(basicVertexDesc));
 	basicEffect = new Effect(device, "Shaders\\cso\\basic_texture_vs.cso", "Shaders\\cso\\basic_texture_ps.cso", basicVertexDesc, ARRAYSIZE(basicVertexDesc));
-
-
 	refMapEffect = new Effect(device, "Shaders\\cso\\reflection_map_vs.cso", "Shaders\\cso\\reflection_map_ps.cso", extVertexDesc, ARRAYSIZE(extVertexDesc));
-
-
 
 	// Setup CBuffer
 	cBufferExtSrc = (CBufferExt*)_aligned_malloc(sizeof(CBufferExt), 16);
@@ -776,7 +770,8 @@ HRESULT Scene::mapCbuffer(void *cBufferExtSrcL, ID3D11Buffer *cBufferExtL)
 
 
 // Render scene
-HRESULT Scene::renderScene() {
+HRESULT Scene::renderScene()
+{
 
 	ID3D11DeviceContext *context = dx->getDeviceContext();
 	// Validate window and D3D context
@@ -786,42 +781,8 @@ HRESULT Scene::renderScene() {
 	// Clear the screen
 	static const FLOAT clearColor[4] = {1.0f, 0.0f, 0.0f, 1.0f };
 
-	ID3D11RenderTargetView* renderTargets[1];
-	// Generate the cube map by rendering to each cube map face.
-	context->RSSetViewports(1, &mCubeMapViewport);
-	for (int i = 0; i < 6; ++i)
-	{
-		// Clear cube map face and depth buffer.
-		context->ClearRenderTargetView(mDynamicCubeMapRTV[i],
-			reinterpret_cast<const float*>(&Colors::Silver));
-		context->ClearDepthStencilView(mDynamicCubeMapDSV,
-			D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	Scene::drawCubeMaps();
 
-		// Bind cube map face as render target.
-		renderTargets[0] = mDynamicCubeMapRTV[i];
-		context->OMSetRenderTargets(
-			1, renderTargets, mDynamicCubeMapDSV);
-		// Draw the scene with the exception of the
-		// center sphere, to this cube map face.
-		DrawScene(mCubeMapCamera[i], false);
-	}
-	// Restore old viewport and render targets.
-	context->RSSetViewports(1, &mScreenViewport);
-	renderTargets[0] = mRenderTargetView;
-	context->OMSetRenderTargets(
-		1, renderTargets, mDepthStencilView);
-	// Have hardware generate lower mipmap levels of cube map.
-	md3dImmediateContext->GenerateMips(mDynamicCubeMapSRV);
-	// Now draw the scene as normal, but with the center sphere.
-	md3dImmediateContext->ClearRenderTargetView(
-		mRenderTargetView,
-		reinterpret_cast<const float*>(&Colors::Silver));
-	md3dImmediateContext->ClearDepthStencilView(
-		mDepthStencilView,
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-		1.0f, 0);
-	DrawScene(mCam, true);
-	HRESULT hr(mSwapChain->Present(0, 0));
 
 
 	// Tutorial 04
@@ -902,4 +863,51 @@ HRESULT Scene::renderScene() {
 	HRESULT hr = dx->presentBackBuffer();
 
 	return S_OK;
+}
+
+HRESULT Scene::drawCubeMaps()
+{
+	ID3D11DeviceContext *context = dx->getDeviceContext();
+	// Validate window and D3D context
+	if (isMinimised() || !context)
+		return E_FAIL;
+
+	// Clear the screen
+	static const FLOAT clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+
+	// Save current render targets
+	ID3D11RenderTargetView* defaultRenderTargetView;
+	ID3D11DepthStencilView* defaultDepthStencilView;
+	context->OMGetRenderTargets(1, &defaultRenderTargetView, &defaultDepthStencilView);
+
+	ID3D11RenderTargetView* renderTargets[1];
+	// Generate the cube map by rendering to each cube map face.
+	context->RSSetViewports(1, &mCubeMapViewport);
+	for (int i = 0; i < 6; ++i)
+	{
+		// Clear cube map face and depth buffer.
+		context->ClearRenderTargetView(mDynamicCubeMapRTV[i], clearColor);
+		context->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+		mDynamicCubeMapDSV = dx->getDepthStencil();
+		// Bind cube map face as render target.
+		renderTargets[0] = mDynamicCubeMapRTV[i];
+		context->OMSetRenderTargets(1, renderTargets, mDynamicCubeMapDSV);
+		// Draw the scene with the exception of the
+		// center sphere, to this cube map face.
+		renderScene();
+	}
+	// Restore old viewport and render targets.
+	context->RSSetViewports(1, &viewport);
+	renderTargets[0] = renderTargetRTV;
+	context->OMSetRenderTargets(1, &defaultRenderTargetView, defaultDepthStencilView);
+	// Have hardware generate lower mipmap levels of cube map.
+	context->GenerateMips(mDynamicCubeMapSRV);
+	// Now draw the scene as normal, but with the center sphere.
+	context->ClearRenderTargetView(defaultRenderTargetView, clearColor);
+	context->ClearDepthStencilView(
+		defaultDepthStencilView,
+		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+		1.0f, 0);
+	renderScene();
 }
