@@ -17,7 +17,7 @@ class CGDClock;
 class Model;
 class Camera;
 class LookAtCamera;
-//class FirstPersonCamera;
+class FirstPersonCamera;
 class Texture;
 class Effect;
 
@@ -141,7 +141,7 @@ public:
 	uint32_t LoadShader(ID3D11Device *device, const char *filename, char **VSBytecode, ID3D11VertexShader **vertexShader);
 	HRESULT initialiseSceneResources();
 	void BuildCubeFaceCamera(float x, float y, float z);
-	HRESULT updateScene(ID3D11DeviceContext *context);
+	HRESULT updateScene(ID3D11DeviceContext *context, Camera *camera);
 	HRESULT renderScene();
 
 	HRESULT drawCubeMaps();

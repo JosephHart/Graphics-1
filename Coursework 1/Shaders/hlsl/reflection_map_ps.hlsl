@@ -81,8 +81,8 @@ FragmentOutputPacket main(FragmentInputPacket v) {
 	///////// PARAMETERS Could be added to CBUFFER //////////////////
 	float FresnelBias = 0.1;//0.3;
 	float FresnelExp = 0.5;//4;
-	float useSpecMap = 1.0;
-	float useDiffMap = 1.0;
+	float useSpecMap = 0.0;
+	float useDiffMap = 0.0;
 
 	float3 N = normalize(v.normalW);
 	float4 baseColour = v.matDiffuse;

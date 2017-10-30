@@ -297,7 +297,7 @@ HRESULT Scene::resizeResources() {
 // Helper function to call updateScene followed by renderScene
 HRESULT Scene::updateAndRenderScene() {
 	ID3D11DeviceContext *context = dx->getDeviceContext();
-	HRESULT hr = updateScene(context);
+	HRESULT hr = updateScene(context, mainCamera);
 
 	if (SUCCEEDED(hr))
 		hr = renderScene();
@@ -535,6 +535,7 @@ HRESULT Scene::initialiseSceneResources() {
 	depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	depthTexDesc.CPUAccessFlags = 0;
 	depthTexDesc.MiscFlags = 0;
+
 	ID3D11Texture2D* depthTex = 0;
 	hr = (device->CreateTexture2D(&depthTexDesc, 0, &depthTex));
 	// Create the depth stencil view for the entire buffer.
@@ -543,8 +544,7 @@ HRESULT Scene::initialiseSceneResources() {
 	dsvDesc.Flags = 0;
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
-	hr = (device->CreateDepthStencilView(depthTex,
-		&dsvDesc, &mDynamicCubeMapDSV));
+	hr = (device->CreateDepthStencilView(depthTex, &dsvDesc, &mDynamicCubeMapDSV));
 
 	//Setup viewport
 	mCubeMapViewport.TopLeftX = 0.0f;
@@ -578,9 +578,8 @@ HRESULT Scene::initialiseSceneResources() {
 
 
 	//Create Texture
-	ID3D11Texture2D*renderTargetTexture = nullptr;
-	hr = device->CreateTexture2D(&texDesc, 0,
-		&renderTargetTexture);
+	ID3D11Texture2D *renderTargetTexture = nullptr;
+	hr = device->CreateTexture2D(&texDesc, 0, &renderTargetTexture);
 
 	//Create render target view
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
@@ -660,7 +659,7 @@ HRESULT Scene::initialiseSceneResources() {
 	rustDiffTexture = new Texture(device, L"Resources\\Textures\\rustDiff.jpg");
 	rustSpecTexture = new Texture(device, L"Resources\\Textures\\rustSpec.jpg");
 
-	ID3D11ShaderResourceView *sphereTextureArray[] = { rustDiffTexture->SRV, envMapTexture->SRV, rustSpecTexture->SRV };
+	ID3D11ShaderResourceView *sphereTextureArray[] = { rustDiffTexture->SRV, mDynamicCubeMapSRV, rustSpecTexture->SRV };
 
 	//load bridge
 	bridge = new Model(device, perPixelLightingEffect, wstring(L"Resources\\Models\\bridge.3ds"), brickTexture->SRV, &mattWhite);
@@ -669,7 +668,7 @@ HRESULT Scene::initialiseSceneResources() {
 	box = new Box(device, skyBoxEffect, envMapTexture->SRV);
 	triangle = new Quad(device, basicEffect->getVSInputLayout());
 
-
+	BuildCubeFaceCamera(0, 0, 0);
 	return S_OK;
 }
 
@@ -719,14 +718,14 @@ void Scene::BuildCubeFaceCamera(float x, float y, float z)
 
 
 // Update scene state (perform animations etc)
-HRESULT Scene::updateScene(ID3D11DeviceContext *context) {
+HRESULT Scene::updateScene(ID3D11DeviceContext *context, Camera *camera) {
 
 
 	mainClock->tick();
 	gu_seconds tDelta = mainClock->gameTimeElapsed();
 
 	cBufferExtSrc->Timer = (FLOAT)tDelta;
-	XMStoreFloat4(&cBufferExtSrc->eyePos, mainCamera->getPos());
+	XMStoreFloat4(&cBufferExtSrc->eyePos, camera->getPos());
 
 
 	
@@ -735,17 +734,17 @@ HRESULT Scene::updateScene(ID3D11DeviceContext *context) {
 
 	cBufferExtSrc->worldMatrix = XMMatrixScaling(0.05, 0.05, 0.05)*XMMatrixTranslation(4.5, -1.2, 4);
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));	
-	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*mainCamera->getViewMatrix()*mainCamera->getProjMatrix();
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferBridge);
 
 	cBufferExtSrc->worldMatrix = XMMatrixScaling(100.0,100, 100)*XMMatrixTranslation(0, 0, 0);
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
-	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*mainCamera->getViewMatrix()*mainCamera->getProjMatrix();
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferSkyBox);
 
 	cBufferExtSrc->worldMatrix = XMMatrixScaling(1.0, 1, 1)*XMMatrixTranslation(0, 0, 0)*XMMatrixRotationX(tDelta);
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
-	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*mainCamera->getViewMatrix()*mainCamera->getProjMatrix();
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferSphere);
 
 
@@ -781,25 +780,71 @@ HRESULT Scene::renderScene()
 	// Clear the screen
 	static const FLOAT clearColor[4] = {1.0f, 0.0f, 0.0f, 1.0f };
 
-	Scene::drawCubeMaps();
+	// Save current render targets
+	ID3D11RenderTargetView* defaultRenderTargetView;
+	ID3D11DepthStencilView* defaultDepthStencilView;
+
+
+
+	context->OMGetRenderTargets(1, &defaultRenderTargetView, &defaultDepthStencilView);
+
+	ID3D11RenderTargetView* renderTargets[1];
+	// Generate the cube map by rendering to each cube map face.
+	context->RSSetViewports(1, &mCubeMapViewport);
+	for (int i = 0; i < 6; ++i)
+	{
+		updateScene(context, &mCubeMapCamera[i]);
+		rebuildViewport(&mCubeMapCamera[i]);
+		// Clear cube map face and depth buffer.
+		context->ClearRenderTargetView(mDynamicCubeMapRTV[i], clearColor);
+		context->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+		//mDynamicCubeMapDSV = dx->getDepthStencil();
+		// Bind cube map face as render target.
+		renderTargets[0] = mDynamicCubeMapRTV[i];
+		context->OMSetRenderTargets(1, renderTargets, mDynamicCubeMapDSV);
+		// Draw the scene with the exception of the
+		// center sphere, to this cube map face.
+		if (bridge) {
+
+			// Setup pipeline for effect
+			// Apply the bridge cBuffer.
+			context->VSSetConstantBuffers(0, 1, &cBufferBridge);
+			context->PSSetConstantBuffers(0, 1, &cBufferBridge);
+			// Render
+			bridge->render(context);
+		}
+
+		if (box) {
+			// Apply the box cBuffer.
+			context->VSSetConstantBuffers(0, 1, &cBufferSkyBox);
+			context->PSSetConstantBuffers(0, 1, &cBufferSkyBox);
+			// Render
+			box->render(context);
+		}
+	}
+	// Restore old viewport and render targets.
+	context->RSSetViewports(1, &viewport);
+	renderTargets[0] = renderTargetRTV;
+	context->OMSetRenderTargets(1, &defaultRenderTargetView, defaultDepthStencilView);
+	// Have hardware generate lower mipmap levels of cube map.
+	context->GenerateMips(mDynamicCubeMapSRV);
+
+	//update scene for main camera
+	rebuildViewport(mainCamera);
+	updateScene(context, mainCamera);
+
+	//testing
+	//rebuildViewport(&mCubeMapCamera[2]);
+	//updateScene(context, &mCubeMapCamera[2]);
+
+	// Now draw the scene as normal, but with the center sphere.
+	context->ClearRenderTargetView(defaultRenderTargetView, clearColor);
+	context->ClearDepthStencilView(defaultDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 
 
 	// Tutorial 04
-	
-	// Save current render targets
-	ID3D11RenderTargetView* defaultRenderTargetView[1];
-	ID3D11DepthStencilView* defaultDepthStencilView;
-	context->OMGetRenderTargets(1, defaultRenderTargetView, &defaultDepthStencilView);
-	
-	// Set new render targets - we are using the default depth/stencil as it is the same size
-	ID3D11RenderTargetView* renderTarget[6];
-	renderTarget[0] = renderTargetRTV;
-	context->OMSetRenderTargets(1, renderTarget, defaultDepthStencilView);
-
-	// Clear new render target and original depth stencil
-	context->ClearRenderTargetView(renderTargetRTV, clearColor);
-	context->ClearDepthStencilView(dx->getDepthStencil(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	if (bridge) {
 
@@ -811,103 +856,26 @@ HRESULT Scene::renderScene()
 		bridge->render(context);
 	}
 
-	if (cube) {
+	if (box) {
 		// Apply the box cBuffer.
 		context->VSSetConstantBuffers(0, 1, &cBufferSkyBox);
 		context->PSSetConstantBuffers(0, 1, &cBufferSkyBox);
 		// Render
-		cube->render(context);
+		box->render(context);
 	}
 
-	//if (sphere) {
-	//	
-	//	
-	//	// Apply the sphere cBuffer.
-	//	context->VSSetConstantBuffers(0, 1, &cBufferSphere);
-	//	context->PSSetConstantBuffers(0, 1, &cBufferSphere);
-	//	// Render
-	//	sphere->render(context);
-	//}
-
-
-
-	// Tutorial 04
-	// Restore default render targets this also releases our new render target view
-	
-	context->OMSetRenderTargets(1, defaultRenderTargetView, defaultDepthStencilView);
-	float clearColor2[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
-	// Clear new render target and original depth stencil
-	context->ClearRenderTargetView(dx->getBackBufferRTV(), clearColor2);
-	context->ClearDepthStencilView(dx->getDepthStencil(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-
-
-	if (triangle) {
-		// Setup pipeline for effect
-		basicEffect->bindPipeline(context);
-		// Set Vertex and Pixel shaders
-		context->VSSetShader(basicEffect->getVertexShader(), 0, 0);
-		context->PSSetShader(basicEffect->getPixelShader(), 0, 0);
-		//context->GSSetShader(basicEffect->getGeometryShader(), 0, 0);
-		// No cBuffer needed.
-		context->PSSetShaderResources(0, 1, &brickTexture->SRV);
-		context->PSSetShaderResources(1, 1, &renderTargetSRV);
+	if (sphere) {
+		
+		
+		// Apply the sphere cBuffer.
+		context->VSSetConstantBuffers(0, 1, &cBufferSphere);
+		context->PSSetConstantBuffers(0, 1, &cBufferSphere);
 		// Render
-		triangle->render(context);
-		context->PSSetShaderResources(0, 1,&brickTexture->SRV );
-		context->PSSetShaderResources(1, 1, &brickTexture->SRV);
-		//context->GSSetShader(NULL, 0, 0); //disable geometry shader
+		sphere->render(context);
 	}
 
 	// Present current frame to the screen
 	HRESULT hr = dx->presentBackBuffer();
 
 	return S_OK;
-}
-
-HRESULT Scene::drawCubeMaps()
-{
-	ID3D11DeviceContext *context = dx->getDeviceContext();
-	// Validate window and D3D context
-	if (isMinimised() || !context)
-		return E_FAIL;
-
-	// Clear the screen
-	static const FLOAT clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-
-	// Save current render targets
-	ID3D11RenderTargetView* defaultRenderTargetView;
-	ID3D11DepthStencilView* defaultDepthStencilView;
-	context->OMGetRenderTargets(1, &defaultRenderTargetView, &defaultDepthStencilView);
-
-	ID3D11RenderTargetView* renderTargets[1];
-	// Generate the cube map by rendering to each cube map face.
-	context->RSSetViewports(1, &mCubeMapViewport);
-	for (int i = 0; i < 6; ++i)
-	{
-		// Clear cube map face and depth buffer.
-		context->ClearRenderTargetView(mDynamicCubeMapRTV[i], clearColor);
-		context->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-		mDynamicCubeMapDSV = dx->getDepthStencil();
-		// Bind cube map face as render target.
-		renderTargets[0] = mDynamicCubeMapRTV[i];
-		context->OMSetRenderTargets(1, renderTargets, mDynamicCubeMapDSV);
-		// Draw the scene with the exception of the
-		// center sphere, to this cube map face.
-		renderScene();
-	}
-	// Restore old viewport and render targets.
-	context->RSSetViewports(1, &viewport);
-	renderTargets[0] = renderTargetRTV;
-	context->OMSetRenderTargets(1, &defaultRenderTargetView, defaultDepthStencilView);
-	// Have hardware generate lower mipmap levels of cube map.
-	context->GenerateMips(mDynamicCubeMapSRV);
-	// Now draw the scene as normal, but with the center sphere.
-	context->ClearRenderTargetView(defaultRenderTargetView, clearColor);
-	context->ClearDepthStencilView(
-		defaultDepthStencilView,
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-		1.0f, 0);
-	renderScene();
 }
