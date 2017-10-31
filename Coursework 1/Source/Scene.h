@@ -135,6 +135,7 @@ public:
 	// Methods to handle initialisation, update and rendering of the scene
 	//
 	HRESULT rebuildViewport(Camera *camera);
+	HRESULT rebuildReflectiveViewport(Camera *camera);
 	HRESULT initDefaultPipeline();
 	HRESULT bindDefaultPipeline();
 	HRESULT LoadShader(ID3D11Device *device, const char *filename, char **PSBytecode, ID3D11PixelShader **pixelShader);
@@ -143,8 +144,7 @@ public:
 	void BuildCubeFaceCamera(float x, float y, float z);
 	HRESULT updateScene(ID3D11DeviceContext *context, Camera *camera);
 	HRESULT renderScene();
-
-	HRESULT drawCubeMaps();
+	HRESULT renderSceneElements(ID3D11DeviceContext *context);
 
 
 

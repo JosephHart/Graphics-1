@@ -194,8 +194,6 @@ BOOL Scene::isMinimised() {
 	return (GetWindowPlacement(wndHandle, &wp) != 0 && wp.showCmd == SW_SHOWMINIMIZED);
 }
 
-
-
 //
 // Public interface implementation
 //
@@ -217,7 +215,6 @@ Scene* Scene::CreateScene(const LONG _width, const LONG _height, const wchar_t* 
 
 	return dxScene;
 }
-
 
 // Destructor
 Scene::~Scene() {
@@ -262,7 +259,6 @@ Scene::~Scene() {
 		DestroyWindow(wndHandle);
 }
 
-
 // Decouple the encapsulated HWND and call DestoryWindow on the HWND
 void Scene::destoryWindow() {
 
@@ -274,7 +270,6 @@ void Scene::destoryWindow() {
 		DestroyWindow(hWnd);
 	}
 }
-
 
 // Resize swap chain buffers and update pipeline viewport configurations in response to a window resize event
 HRESULT Scene::resizeResources() {
@@ -293,7 +288,6 @@ HRESULT Scene::resizeResources() {
 	return S_OK;
 }
 
-
 // Helper function to call updateScene followed by renderScene
 HRESULT Scene::updateAndRenderScene() {
 	ID3D11DeviceContext *context = dx->getDeviceContext();
@@ -305,9 +299,7 @@ HRESULT Scene::updateAndRenderScene() {
 	return hr;
 }
 
-
 // Clock handling methods
-
 void Scene::startClock() {
 
 	mainClock->start();
@@ -324,8 +316,6 @@ void Scene::reportTimingData() {
 	cout << "Game time elapsed = " << mainClock->gameTimeElapsed() << endl << endl;
 	mainClock->reportTimingData();
 }
-
-
 
 //
 // Event handling methods
@@ -353,21 +343,17 @@ void Scene::handleMouseWheel(const short zDelta) {
 	//mainCamera->move(zDelta*0.01);
 }
 
-
 // Process key down event.  keyCode indicates the key pressed while extKeyFlags indicates the extended key status at the time of the key down event (see http://msdn.microsoft.com/en-gb/library/windows/desktop/ms646280%28v=vs.85%29.aspx).
 void Scene::handleKeyDown(const WPARAM keyCode, const LPARAM extKeyFlags) {
 
 	// Add key down handler here...
 }
 
-
 // Process key up event.  keyCode indicates the key released while extKeyFlags indicates the extended key status at the time of the key up event (see http://msdn.microsoft.com/en-us/library/windows/desktop/ms646281%28v=vs.85%29.aspx).
 void Scene::handleKeyUp(const WPARAM keyCode, const LPARAM extKeyFlags) {
 
 	// Add key up handler here...
 }
-
-
 
 //
 // Methods to handle initialisation, update and rendering of the scene
@@ -405,8 +391,36 @@ HRESULT Scene::rebuildViewport(Camera *camera){
 	return S_OK;
 }
 
+HRESULT Scene::rebuildReflectiveViewport(Camera *camera) {
+	// Binds the render target view and depth/stencil view to the pipeline.
+	// Sets up viewport for the main window (wndHandle) 
+	// Called at initialisation or in response to window resize
 
+	ID3D11DeviceContext *context = dx->getDeviceContext();
 
+	if (!context)
+		return E_FAIL;
+
+	// Bind the render target view and depth/stencil view to the pipeline.
+	ID3D11RenderTargetView* renderTargetView = dx->getBackBufferRTV();
+	context->OMSetRenderTargets(1, &renderTargetView, dx->getDepthStencil());
+	// Setup viewport for the main window (wndHandle)
+	RECT clientRect;
+	GetClientRect(wndHandle, &clientRect);
+
+	mCubeMapViewport.TopLeftX = 0;
+	mCubeMapViewport.TopLeftY = 0;
+	mCubeMapViewport.Width = 256;
+	mCubeMapViewport.Height = 256;
+	mCubeMapViewport.MinDepth = 0.0f;
+	mCubeMapViewport.MaxDepth = 1.0f;
+
+	// Compute the projection matrix.
+
+	camera->setProjMatrix(XMMatrixPerspectiveFovLH(0.5*XM_PI, viewport.Width / viewport.Height, 1.0f, 1000.0f));
+	camera->UpdateViewMatrix();
+	return S_OK;
+}
 
 
 HRESULT Scene::LoadShader(ID3D11Device *device, const char *filename, char **PSBytecode, ID3D11PixelShader **pixelShader){
@@ -444,7 +458,6 @@ uint32_t Scene::LoadShader(ID3D11Device *device, const char *filename, char **VS
 		throw std::exception("Cannot create VertexShader interface");
 	return shaderBytes;
 }
-
 
 // Main resource setup for the application.  These are setup around a given Direct3D device.
 HRESULT Scene::initialiseSceneResources() {
@@ -519,8 +532,7 @@ HRESULT Scene::initialiseSceneResources() {
 	cubeSrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
 	cubeSrvDesc.TextureCube.MostDetailedMip = 0;
 	cubeSrvDesc.TextureCube.MipLevels = -1;
-	hr = (device->CreateShaderResourceView(
-		cubeTex, &cubeSrvDesc, &mDynamicCubeMapSRV));
+	hr = (device->CreateShaderResourceView(cubeTex, &cubeSrvDesc, &mDynamicCubeMapSRV));
 
 
 	D3D11_TEXTURE2D_DESC depthTexDesc;
@@ -665,6 +677,7 @@ HRESULT Scene::initialiseSceneResources() {
 	bridge = new Model(device, perPixelLightingEffect, wstring(L"Resources\\Models\\bridge.3ds"), brickTexture->SRV, &mattWhite);
 	sphere = new Model(device, refMapEffect, wstring(L"Resources\\Models\\sphere.3ds"), sphereTextureArray, 3, &glossWhite);
 
+	//cube = new Box(device, refMapEffect, mDynamicCubeMapSRV);
 	box = new Box(device, skyBoxEffect, envMapTexture->SRV);
 	triangle = new Quad(device, basicEffect->getVSInputLayout());
 
@@ -711,15 +724,13 @@ void Scene::BuildCubeFaceCamera(float x, float y, float z)
 		XMVECTOR tempUps = XMLoadFloat3(pSource);
 
 		mCubeMapCamera[i].LookAt(tempCenter, tempTarget, tempUps);
-		mCubeMapCamera[i].SetLens(0.5f*XM_PI, 1.0f, 0.1f, 1000.0f);
+		mCubeMapCamera[i].SetLens(180, 1.0f, 0.1f, 1000.0f);
 		mCubeMapCamera[i].UpdateViewMatrix();
 	}
 }
 
-
 // Update scene state (perform animations etc)
 HRESULT Scene::updateScene(ID3D11DeviceContext *context, Camera *camera) {
-
 
 	mainClock->tick();
 	gu_seconds tDelta = mainClock->gameTimeElapsed();
@@ -727,27 +738,23 @@ HRESULT Scene::updateScene(ID3D11DeviceContext *context, Camera *camera) {
 	cBufferExtSrc->Timer = (FLOAT)tDelta;
 	XMStoreFloat4(&cBufferExtSrc->eyePos, camera->getPos());
 
-
-	
 	// Update bridge cBuffer
 	// Scale and translate bridge world matrix
 
-	cBufferExtSrc->worldMatrix = XMMatrixScaling(0.05, 0.05, 0.05)*XMMatrixTranslation(4.5, -1.2, 4);
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(0.05, 0.05, 0.05)*XMMatrixTranslation(0, -1.2, 12);
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));	
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferBridge);
 
-	cBufferExtSrc->worldMatrix = XMMatrixScaling(100.0,100, 100)*XMMatrixTranslation(0, 0, 0);
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(1000 ,1000, 1000)*XMMatrixTranslation(0, 0, 0);
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferSkyBox);
 
-	cBufferExtSrc->worldMatrix = XMMatrixScaling(1.0, 1, 1)*XMMatrixTranslation(0, 0, 0)*XMMatrixRotationX(tDelta);
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(1, 1, 1)*XMMatrixTranslation(0, 0, 0)*XMMatrixRotationX(tDelta);
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferSphere);
-
-
 
 	return S_OK;
 }
@@ -767,7 +774,6 @@ HRESULT Scene::mapCbuffer(void *cBufferExtSrcL, ID3D11Buffer *cBufferExtL)
 	return hr;
 }
 
-
 // Render scene
 HRESULT Scene::renderScene()
 {
@@ -784,8 +790,6 @@ HRESULT Scene::renderScene()
 	ID3D11RenderTargetView* defaultRenderTargetView;
 	ID3D11DepthStencilView* defaultDepthStencilView;
 
-
-
 	context->OMGetRenderTargets(1, &defaultRenderTargetView, &defaultDepthStencilView);
 
 	ID3D11RenderTargetView* renderTargets[1];
@@ -794,58 +798,55 @@ HRESULT Scene::renderScene()
 	for (int i = 0; i < 6; ++i)
 	{
 		updateScene(context, &mCubeMapCamera[i]);
-		rebuildViewport(&mCubeMapCamera[i]);
+		rebuildReflectiveViewport(&mCubeMapCamera[i]);
 		// Clear cube map face and depth buffer.
 		context->ClearRenderTargetView(mDynamicCubeMapRTV[i], clearColor);
 		context->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		//mDynamicCubeMapDSV = dx->getDepthStencil();
 		// Bind cube map face as render target.
 		renderTargets[0] = mDynamicCubeMapRTV[i];
 		context->OMSetRenderTargets(1, renderTargets, mDynamicCubeMapDSV);
 		// Draw the scene with the exception of the
 		// center sphere, to this cube map face.
-		if (bridge) {
+		renderSceneElements(context);
 
-			// Setup pipeline for effect
-			// Apply the bridge cBuffer.
-			context->VSSetConstantBuffers(0, 1, &cBufferBridge);
-			context->PSSetConstantBuffers(0, 1, &cBufferBridge);
-			// Render
-			bridge->render(context);
-		}
-
-		if (box) {
-			// Apply the box cBuffer.
-			context->VSSetConstantBuffers(0, 1, &cBufferSkyBox);
-			context->PSSetConstantBuffers(0, 1, &cBufferSkyBox);
-			// Render
-			box->render(context);
-		}
 	}
+	// Have hardware generate lower mipmap levels of cube map.
+	context->GenerateMips(mDynamicCubeMapSRV);
+
 	// Restore old viewport and render targets.
 	context->RSSetViewports(1, &viewport);
 	renderTargets[0] = renderTargetRTV;
 	context->OMSetRenderTargets(1, &defaultRenderTargetView, defaultDepthStencilView);
-	// Have hardware generate lower mipmap levels of cube map.
-	context->GenerateMips(mDynamicCubeMapSRV);
 
 	//update scene for main camera
 	rebuildViewport(mainCamera);
 	updateScene(context, mainCamera);
 
-	//testing
-	//rebuildViewport(&mCubeMapCamera[2]);
-	//updateScene(context, &mCubeMapCamera[2]);
-
 	// Now draw the scene as normal, but with the center sphere.
 	context->ClearRenderTargetView(defaultRenderTargetView, clearColor);
 	context->ClearDepthStencilView(defaultDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-
-
 	// Tutorial 04
+	renderSceneElements(context);
 
+	if (sphere) {
+		
+		// Apply the sphere cBuffer.
+		context->VSSetConstantBuffers(0, 1, &cBufferSphere);
+		context->PSSetConstantBuffers(0, 1, &cBufferSphere);
+		// Render
+		sphere->render(context);
+	}
+
+	// Present current frame to the screen
+	HRESULT hr = dx->presentBackBuffer();
+
+	return S_OK;
+}
+
+HRESULT Scene::renderSceneElements(ID3D11DeviceContext *context)
+{
 	if (bridge) {
 
 		// Setup pipeline for effect
@@ -863,19 +864,6 @@ HRESULT Scene::renderScene()
 		// Render
 		box->render(context);
 	}
-
-	if (sphere) {
-		
-		
-		// Apply the sphere cBuffer.
-		context->VSSetConstantBuffers(0, 1, &cBufferSphere);
-		context->PSSetConstantBuffers(0, 1, &cBufferSphere);
-		// Render
-		sphere->render(context);
-	}
-
-	// Present current frame to the screen
-	HRESULT hr = dx->presentBackBuffer();
 
 	return S_OK;
 }

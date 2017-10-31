@@ -1,67 +1,65 @@
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.pch
-f:\my documents\github\graphics-1\coursework 1\debug\vc120.pdb
-f:\my documents\github\graphics-1\coursework 1\debug\vc120.idb
-f:\my documents\github\graphics-1\coursework 1\debug\stdafx.obj
-f:\my documents\github\graphics-1\coursework 1\debug\model.obj
-f:\my documents\github\graphics-1\coursework 1\debug\dxvertexparticle.obj
-f:\my documents\github\graphics-1\coursework 1\debug\effect.obj
-f:\my documents\github\graphics-1\coursework 1\debug\firstpersoncamera.obj
-f:\my documents\github\graphics-1\coursework 1\debug\cgdconsole.obj
-f:\my documents\github\graphics-1\coursework 1\debug\dxvertexbasic.obj
-f:\my documents\github\graphics-1\coursework 1\debug\dxvertexext.obj
-f:\my documents\github\graphics-1\coursework 1\debug\particles.obj
-f:\my documents\github\graphics-1\coursework 1\debug\scene.obj
-f:\my documents\github\graphics-1\coursework 1\debug\dxsystem.obj
-f:\my documents\github\graphics-1\coursework 1\debug\cgdclock.obj
-f:\my documents\github\graphics-1\coursework 1\debug\gumemory.obj
-f:\my documents\github\graphics-1\coursework 1\debug\guobject.obj
-f:\my documents\github\graphics-1\coursework 1\debug\main.obj
-f:\my documents\github\graphics-1\coursework 1\debug\material.obj
-f:\my documents\github\graphics-1\coursework 1\debug\mesh.obj
-f:\my documents\github\graphics-1\coursework 1\debug\quad.obj
-f:\my documents\github\graphics-1\coursework 1\debug\terrain.obj
-f:\my documents\github\graphics-1\coursework 1\debug\texture.obj
-f:\my documents\github\graphics-1\coursework 1\debug\triangle.obj
-f:\my documents\github\graphics-1\coursework 1\debug\animation.obj
-f:\my documents\github\graphics-1\coursework 1\debug\box.obj
-f:\my documents\github\graphics-1\coursework 1\debug\camera.obj
-f:\my documents\github\graphics-1\coursework 1\debug\dxbasemodel.obj
-f:\my documents\github\graphics-1\coursework 1\debug\grid.obj
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_gs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\basic_texture_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\basic_texture_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\convolve_u_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\convolve_v_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\copy_depth_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\copy_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\emissive_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\fire_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\fire_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\grass_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\grass_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\ocean_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\ocean_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\reflection_map_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\reflection_map_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\screen_quad_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\sky_box_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\sky_box_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\per_pixel_lighting_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\per_pixel_lighting_vs.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\tree_ps.cso
-f:\my documents\github\graphics-1\coursework 1\shaders\cso\tree_vs.cso
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.ilk
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.exe
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.pdb
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.command.1.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.read.1.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.write.1.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\dx11proj.write.1u.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.command.1.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.read.1.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.write.1.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.command.1.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.read.1.tlog
-f:\my documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.write.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.pch
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\vc120.pdb
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\vc120.idb
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\stdafx.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\model.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxvertexparticle.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\effect.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\firstpersoncamera.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\cgdconsole.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxvertexbasic.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxvertexext.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\particles.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxsystem.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\cgdclock.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\gumemory.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\guobject.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\material.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\mesh.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\quad.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\terrain.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\texture.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\triangle.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\animation.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\box.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\camera.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxbasemodel.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\grid.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\scene.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\main.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_gs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\basic_texture_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\basic_texture_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\convolve_u_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\convolve_v_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\copy_depth_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\copy_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\emissive_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\fire_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\fire_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\grass_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\grass_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\ocean_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\ocean_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\reflection_map_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\reflection_map_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\screen_quad_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\sky_box_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\sky_box_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\per_pixel_lighting_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\per_pixel_lighting_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\tree_ps.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\tree_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.pdb
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.command.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.read.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.write.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\dx11proj.write.1u.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.command.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.read.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.write.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.command.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.read.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.write.1.tlog
