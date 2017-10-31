@@ -129,6 +129,9 @@
     <ClInclude Include="Source\Particles.h">
       <Filter>Models</Filter>
     </ClInclude>
+    <ClInclude Include="DXBlob.h">
+      <Filter>DirectX Classes\DirectX Helper Classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\stdafx.cpp">

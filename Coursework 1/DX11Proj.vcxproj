@@ -85,6 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DXBlob.h" />
     <ClInclude Include="Libs\DirectXTK\DDSTextureLoader.h" />
     <ClInclude Include="Libs\DirectXTK\WICTextureLoader.h" />
     <ClInclude Include="Source\Animation.h" />

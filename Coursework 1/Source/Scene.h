@@ -11,6 +11,7 @@
 #include <Camera.h>
 #include <CBufferStructures.h>
 #include <Material.h>
+#include <Grid.h>
 
 class DXSystem;
 class CGDClock;
@@ -43,9 +44,11 @@ class Scene : public GUObject {
 	Effect									*skyBoxEffect;
 	Effect									*basicEffect;
 	Effect									*refMapEffect;
+	Effect									*grassEffect;
 	ID3D11Buffer							*cBufferSkyBox = nullptr;
 	ID3D11Buffer							*cBufferBridge = nullptr;
 	ID3D11Buffer							*cBufferSphere = nullptr;
+	ID3D11Buffer							*cBufferGrass = nullptr;
 	CBufferExt								*cBufferExtSrc = nullptr;
 
 	//Textures
@@ -53,12 +56,22 @@ class Scene : public GUObject {
 	Texture									*rustDiffTexture = nullptr;
 	Texture									*rustSpecTexture = nullptr;
 	Texture									*envMapTexture = nullptr;
+	Texture									*grassDiffuseMap = nullptr;
+	Texture									*grassAlphaMap = nullptr;
+	Texture									*grassHeightMap = nullptr;
+	Texture									*grassNormalMap = nullptr;
 
 	// Tutorial 04
 	ID3D11ShaderResourceView				*renderTargetSRV;
 	ID3D11RenderTargetView					*renderTargetRTV;
+
 	ID3D11ShaderResourceView				*mDynamicCubeMapSRV;
 	ID3D11RenderTargetView					*mDynamicCubeMapRTV[6];
+
+	ID3D11ShaderResourceView				*grassDiffuseMapSRV = nullptr;
+	ID3D11ShaderResourceView				*grassAlphaMapSRV = nullptr;
+	ID3D11ShaderResourceView				*grassHeightMapSRV = nullptr;
+	ID3D11ShaderResourceView				*grassNormalMapSRV = nullptr;
 
 	//DepthStencilViews
 	ID3D11DepthStencilView					*mDynamicCubeMapDSV;
@@ -69,6 +82,7 @@ class Scene : public GUObject {
 	Model									*sphere = nullptr;
 	Quad									*triangle = nullptr;
 	Box										*cube = nullptr;
+	Grid									*floor = nullptr;
 
 	// Main FPS clock
 	CGDClock								*mainClock = nullptr;
@@ -77,6 +91,10 @@ class Scene : public GUObject {
 	//FirstPersonCamera						*mainCamera = nullptr;
 	LookAtCamera							*mainCamera = nullptr;
 	Camera									mCubeMapCamera[6];
+
+	//Variables
+	float									grassLength = 0.005f;
+	int										numGrassPasses = 40;
 
 	//
 	// Private interface

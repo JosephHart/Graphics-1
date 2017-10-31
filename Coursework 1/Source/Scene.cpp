@@ -625,6 +625,7 @@ HRESULT Scene::initialiseSceneResources() {
 	//basicEffect = new Effect(device, "Shaders\\cso\\basic_colour_vs.cso", "Shaders\\cso\\basic_colour_ps.cso", "Shaders\\cso\\basic_colour_gs.cso", basicVertexDesc, ARRAYSIZE(basicVertexDesc));
 	basicEffect = new Effect(device, "Shaders\\cso\\basic_texture_vs.cso", "Shaders\\cso\\basic_texture_ps.cso", basicVertexDesc, ARRAYSIZE(basicVertexDesc));
 	refMapEffect = new Effect(device, "Shaders\\cso\\reflection_map_vs.cso", "Shaders\\cso\\reflection_map_ps.cso", extVertexDesc, ARRAYSIZE(extVertexDesc));
+	grassEffect = new Effect(device, "Shaders\\cso\\grass_vs.cso", "Shaders\\cso\\grass_ps.cso", extVertexDesc, ARRAYSIZE(extVertexDesc));
 
 	// Setup CBuffer
 	cBufferExtSrc = (CBufferExt*)_aligned_malloc(sizeof(CBufferExt), 16);
@@ -656,6 +657,8 @@ HRESULT Scene::initialiseSceneResources() {
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferBridge);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferSkyBox);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferSphere);
+	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferGrass);
+
 
 
 	// Setup example objects
@@ -670,6 +673,10 @@ HRESULT Scene::initialiseSceneResources() {
 	envMapTexture = new Texture(device, L"Resources\\Textures\\grassenvmap1024.dds");
 	rustDiffTexture = new Texture(device, L"Resources\\Textures\\rustDiff.jpg");
 	rustSpecTexture = new Texture(device, L"Resources\\Textures\\rustSpec.jpg");
+	grassAlphaMap = new Texture(device, L"Resources\\Textures\\grassAlpha.tif");
+	grassDiffuseMap = new Texture(device, L"Resources\\Textures\\grass.png");
+	grassNormalMap = new Texture(device, L"Resources\\Textures\\NormalMap.png");
+	grassHeightMap = new Texture(device, L"Resources\\Textures\\heightmap.bmp");
 
 	ID3D11ShaderResourceView *sphereTextureArray[] = { rustDiffTexture->SRV, mDynamicCubeMapSRV, rustSpecTexture->SRV };
 
@@ -680,6 +687,8 @@ HRESULT Scene::initialiseSceneResources() {
 	//cube = new Box(device, refMapEffect, mDynamicCubeMapSRV);
 	box = new Box(device, skyBoxEffect, envMapTexture->SRV);
 	triangle = new Quad(device, basicEffect->getVSInputLayout());
+
+	floor = new Grid(100, 100, device, grassEffect, grassAlphaMapSRV, &mattWhite);
 
 	BuildCubeFaceCamera(0, 0, 0);
 	return S_OK;
@@ -839,6 +848,26 @@ HRESULT Scene::renderScene()
 		sphere->render(context);
 	}
 
+	// Draw the Grass
+	if (floor) {
+		// Update floor cBuffer
+		// Scale and translate floor world matrix
+		cBufferExtSrc->worldMatrix = XMMatrixScaling(5, 5, 5)*XMMatrixTranslation(0, 0, 0);
+		cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+		cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix; //mainCamera->dxViewTransform() * projMatrix->projMatrix;
+
+		// Render
+		for (int i = 0; i < numGrassPasses; i++)
+		{
+			cBufferExtSrc->grassHeight = (grassLength / numGrassPasses)*i;
+			mapCbuffer(cBufferExtSrc, cBufferGrass);
+			//// Apply the cBuffer.
+			context->VSSetConstantBuffers(0, 1, &cBufferGrass);
+			context->PSSetConstantBuffers(0, 1, &cBufferGrass);
+			floor->render(context);
+		}
+	}
+
 	// Present current frame to the screen
 	HRESULT hr = dx->presentBackBuffer();
 
@@ -863,6 +892,26 @@ HRESULT Scene::renderSceneElements(ID3D11DeviceContext *context)
 		context->PSSetConstantBuffers(0, 1, &cBufferSkyBox);
 		// Render
 		box->render(context);
+	}
+
+	// Draw the Grass
+	if (floor) {
+		// Update floor cBuffer
+		// Scale and translate floor world matrix
+		cBufferExtSrc->worldMatrix = XMMatrixScaling(5, 5, 5)*XMMatrixTranslation(0, 0, 0);
+		cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+		cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix; //mainCamera->dxViewTransform() * projMatrix->projMatrix;
+
+		// Render
+		for (int i = 0; i < numGrassPasses; i++)
+		{
+			cBufferExtSrc->grassHeight = (grassLength / numGrassPasses)*i;
+			mapCbuffer(cBufferExtSrc, cBufferGrass);
+			//// Apply the cBuffer.
+			context->VSSetConstantBuffers(0, 1, &cBufferGrass);
+			context->PSSetConstantBuffers(0, 1, &cBufferGrass);
+			floor->render(context);
+		}
 	}
 
 	return S_OK;
