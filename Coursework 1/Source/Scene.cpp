@@ -848,26 +848,6 @@ HRESULT Scene::renderScene()
 		sphere->render(context);
 	}
 
-	// Draw the Grass
-	if (floor) {
-		// Update floor cBuffer
-		// Scale and translate floor world matrix
-		cBufferExtSrc->worldMatrix = XMMatrixScaling(5, 5, 5)*XMMatrixTranslation(0, 0, 0);
-		cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
-		cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix; //mainCamera->dxViewTransform() * projMatrix->projMatrix;
-
-		// Render
-		for (int i = 0; i < numGrassPasses; i++)
-		{
-			cBufferExtSrc->grassHeight = (grassLength / numGrassPasses)*i;
-			mapCbuffer(cBufferExtSrc, cBufferGrass);
-			//// Apply the cBuffer.
-			context->VSSetConstantBuffers(0, 1, &cBufferGrass);
-			context->PSSetConstantBuffers(0, 1, &cBufferGrass);
-			floor->render(context);
-		}
-	}
-
 	// Present current frame to the screen
 	HRESULT hr = dx->presentBackBuffer();
 
