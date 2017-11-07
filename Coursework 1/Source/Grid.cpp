@@ -90,6 +90,28 @@ Grid::Grid(UINT widthl, UINT heightl, ID3D11Device *device, Effect *_effect, ID3
 		if (!SUCCEEDED(hr))
 			throw exception("Vertex buffer cannot be created");
 
+		textureResourceView = tex_view;
+
+		if (textureResourceView)
+			textureResourceView->AddRef(); // We didnt create it here but dont want it deleted by the creator untill we have deconstructed
+
+		D3D11_SAMPLER_DESC samplerDesc;
+
+		ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
+
+		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.MaxAnisotropy = 16;
+		samplerDesc.MinLOD = 0.0f;
+		samplerDesc.MaxLOD = 0.0f;
+		samplerDesc.MipLODBias = 0.0f;
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+
+		hr = device->CreateSamplerState(&samplerDesc, &linearSampler);
+
 	}
 	catch (exception& e)
 	{

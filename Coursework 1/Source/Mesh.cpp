@@ -6,6 +6,8 @@
 Mesh::Mesh(ID3D11Device *device, Effect *_effect, ID3D11ShaderResourceView *_texView, Material *_material)
 {
 	effect = _effect;
+	inputLayout = effect->getVSInputLayout();
+	inputLayout->AddRef();
 	material = _material;
 	//inputLayout = effect->getVSInputLayout();
 	textureResourceView = _texView;
@@ -40,6 +42,10 @@ Mesh::~Mesh()
 void Mesh::render(ID3D11DeviceContext *context) {
 
 	effect->bindPipeline(context);
+
+
+	// Set vertex layout
+	context->IASetInputLayout(effect->getVSInputLayout());
 
 	// set shader reflection map shaders for shark
 	context->VSSetShader(effect->getVertexShader(), 0, 0);

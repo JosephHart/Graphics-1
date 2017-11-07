@@ -130,7 +130,7 @@
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="DXBlob.h">
-      <Filter>DirectX Classes\DirectX Helper Classes</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

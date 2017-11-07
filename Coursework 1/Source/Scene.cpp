@@ -534,7 +534,6 @@ HRESULT Scene::initialiseSceneResources() {
 	cubeSrvDesc.TextureCube.MipLevels = -1;
 	hr = (device->CreateShaderResourceView(cubeTex, &cubeSrvDesc, &mDynamicCubeMapSRV));
 
-
 	D3D11_TEXTURE2D_DESC depthTexDesc;
 	depthTexDesc.Width = CubeMapSize;
 	depthTexDesc.Height = CubeMapSize;
@@ -565,8 +564,6 @@ HRESULT Scene::initialiseSceneResources() {
 	mCubeMapViewport.Height = (float)CubeMapSize;
 	mCubeMapViewport.MinDepth = 0.0f;
 	mCubeMapViewport.MaxDepth = 1.0f;
-	
-
 
 	//////////////////////////////////////////////////////// Tutorial Begin
 	//Tutorial 04 task 1 create render target texture
@@ -588,7 +585,6 @@ HRESULT Scene::initialiseSceneResources() {
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-
 	//Create Texture
 	ID3D11Texture2D *renderTargetTexture = nullptr;
 	hr = device->CreateTexture2D(&texDesc, 0, &renderTargetTexture);
@@ -603,7 +599,6 @@ HRESULT Scene::initialiseSceneResources() {
 
 	hr = device->CreateRenderTargetView(renderTargetTexture, &rtvDesc, &renderTargetRTV);
 
-
 	//Create shader resource view
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = texDesc.Format;
@@ -615,7 +610,6 @@ HRESULT Scene::initialiseSceneResources() {
 
 	// View saves reference.
 	renderTargetTexture->Release();
-
 
 	// Setup objects for the programmable (shader) stages of the pipeline
 
@@ -641,7 +635,6 @@ HRESULT Scene::initialiseSceneResources() {
 
 	XMStoreFloat4(&cBufferExtSrc->eyePos, mainCamera->getPos());// camera->pos;
 
-
 	D3D11_BUFFER_DESC cbufferDesc;
 	D3D11_SUBRESOURCE_DATA cbufferInitData;
 	ZeroMemory(&cbufferDesc, sizeof(D3D11_BUFFER_DESC));
@@ -652,22 +645,20 @@ HRESULT Scene::initialiseSceneResources() {
 	cbufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbufferInitData.pSysMem = cBufferExtSrc;
 	
-
 	//Create bridge CBuffer
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferBridge);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferSkyBox);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferSphere);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferGrass);
 
-
+	dx->getDeviceContext()->PSSetShaderResources(2, 1, &grassAlphaMapSRV);
+	dx->getDeviceContext()->VSSetShaderResources(0, 1, &grassHeightMapSRV);
+	dx->getDeviceContext()->VSSetShaderResources(2, 1, &grassNormalMapSRV);
 
 	// Setup example objects
 	//
-
-
 	mattWhite.setSpecular(XMCOLOR(0, 0, 0, 0));
 	glossWhite.setSpecular(XMCOLOR(1, 1, 1, 1));
-
 
 	brickTexture = new Texture(device, L"Resources\\Textures\\brick_DIFFUSE.jpg");
 	envMapTexture = new Texture(device, L"Resources\\Textures\\grassenvmap1024.dds");
@@ -675,8 +666,8 @@ HRESULT Scene::initialiseSceneResources() {
 	rustSpecTexture = new Texture(device, L"Resources\\Textures\\rustSpec.jpg");
 	grassAlphaMap = new Texture(device, L"Resources\\Textures\\grassAlpha.tif");
 	grassDiffuseMap = new Texture(device, L"Resources\\Textures\\grass.png");
-	grassNormalMap = new Texture(device, L"Resources\\Textures\\NormalMap.png");
-	grassHeightMap = new Texture(device, L"Resources\\Textures\\heightmap.bmp");
+	grassNormalMap = new Texture(device, L"Resources\\Textures\\normalmap.bmp");
+	grassHeightMap = new Texture(device, L"Resources\\Textures\\heightmap1.bmp");
 
 	ID3D11ShaderResourceView *sphereTextureArray[] = { rustDiffTexture->SRV, mDynamicCubeMapSRV, rustSpecTexture->SRV };
 
@@ -684,11 +675,11 @@ HRESULT Scene::initialiseSceneResources() {
 	bridge = new Model(device, perPixelLightingEffect, wstring(L"Resources\\Models\\bridge.3ds"), brickTexture->SRV, &mattWhite);
 	sphere = new Model(device, refMapEffect, wstring(L"Resources\\Models\\sphere.3ds"), sphereTextureArray, 3, &glossWhite);
 
-	//cube = new Box(device, refMapEffect, mDynamicCubeMapSRV);
+	cube = new Box(device, refMapEffect, mDynamicCubeMapSRV);
 	box = new Box(device, skyBoxEffect, envMapTexture->SRV);
 	triangle = new Quad(device, basicEffect->getVSInputLayout());
 
-	floor = new Grid(100, 100, device, grassEffect, grassAlphaMapSRV, &mattWhite);
+	floor = new Grid(100, 100, device, grassEffect, grassDiffuseMap->SRV, &mattWhite);
 
 	BuildCubeFaceCamera(0, 0, 0);
 	return S_OK;
@@ -750,7 +741,7 @@ HRESULT Scene::updateScene(ID3D11DeviceContext *context, Camera *camera) {
 	// Update bridge cBuffer
 	// Scale and translate bridge world matrix
 
-	cBufferExtSrc->worldMatrix = XMMatrixScaling(0.05, 0.05, 0.05)*XMMatrixTranslation(0, -1.2, 12);
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(0.05, 0.05, 0.05)*XMMatrixTranslation(0, -2, 12);
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));	
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferBridge);
@@ -764,6 +755,12 @@ HRESULT Scene::updateScene(ID3D11DeviceContext *context, Camera *camera) {
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferSphere);
+
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(1, 1, 1)*XMMatrixTranslation(-50, -2, -50);
+	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+	mapCbuffer(cBufferExtSrc, cBufferGrass);
+	cBufferExtSrc->grassHeight = (grassLength / numGrassPasses) * numGrassPasses;
 
 	return S_OK;
 }
@@ -874,19 +871,16 @@ HRESULT Scene::renderSceneElements(ID3D11DeviceContext *context)
 		box->render(context);
 	}
 
+	// Set ground vertex and pixel shaders
+	context->VSSetShader(grassEffect->getVertexShader(), 0, 0);
+	context->PSSetShader(grassEffect->getPixelShader(), 0, 0);
+
 	// Draw the Grass
 	if (floor) {
-		// Update floor cBuffer
-		// Scale and translate floor world matrix
-		cBufferExtSrc->worldMatrix = XMMatrixScaling(5, 5, 5)*XMMatrixTranslation(0, 0, 0);
-		cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
-		cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix; //mainCamera->dxViewTransform() * projMatrix->projMatrix;
 
 		// Render
 		for (int i = 0; i < numGrassPasses; i++)
 		{
-			cBufferExtSrc->grassHeight = (grassLength / numGrassPasses)*i;
-			mapCbuffer(cBufferExtSrc, cBufferGrass);
 			//// Apply the cBuffer.
 			context->VSSetConstantBuffers(0, 1, &cBufferGrass);
 			context->PSSetConstantBuffers(0, 1, &cBufferGrass);

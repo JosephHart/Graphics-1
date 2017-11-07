@@ -11,6 +11,7 @@ class Mesh
 protected:
 	Material *material = nullptr;
 	Effect *effect = nullptr;
+	ID3D11InputLayout			*inputLayout = nullptr;
 	UINT numVert=0;
 	UINT numInd = 0;
 	ID3D11Buffer				*vertexBuffer = nullptr;
