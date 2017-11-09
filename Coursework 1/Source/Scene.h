@@ -35,12 +35,14 @@ class Scene : public GUObject {
 
 	Material								mattWhite;
 	Material								glossWhite;
+	Material								midWhite;
 
 	// Direct3D scene textures and resource views
 
 	//Effects
 	Effect									*defaultEffect;
 	Effect									*perPixelLightingEffect;
+	Effect									*perPixelLightingEffectGrass;
 	Effect									*skyBoxEffect;
 	Effect									*basicEffect;
 	Effect									*refMapEffect;
@@ -49,6 +51,7 @@ class Scene : public GUObject {
 	ID3D11Buffer							*cBufferBridge = nullptr;
 	ID3D11Buffer							*cBufferSphere = nullptr;
 	ID3D11Buffer							*cBufferGrass = nullptr;
+	ID3D11Buffer							*cBufferDropship = nullptr;
 	CBufferExt								*cBufferExtSrc = nullptr;
 
 	//Textures
@@ -60,6 +63,8 @@ class Scene : public GUObject {
 	Texture									*grassAlphaMap = nullptr;
 	Texture									*grassHeightMap = nullptr;
 	Texture									*grassNormalMap = nullptr;
+	Texture									*grassTex = nullptr;
+	Texture									*dropshipTex = nullptr;
 
 	// Tutorial 04
 	ID3D11ShaderResourceView				*renderTargetSRV;
@@ -83,6 +88,7 @@ class Scene : public GUObject {
 	Quad									*triangle = nullptr;
 	Box										*cube = nullptr;
 	Grid									*floor = nullptr;
+	Model									*dropship = nullptr;
 
 	// Main FPS clock
 	CGDClock								*mainClock = nullptr;

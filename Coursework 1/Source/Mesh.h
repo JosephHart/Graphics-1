@@ -8,7 +8,7 @@ class Effect;
 
 class Mesh
 {
-protected:
+	public:
 	Material *material = nullptr;
 	Effect *effect = nullptr;
 	ID3D11InputLayout			*inputLayout = nullptr;

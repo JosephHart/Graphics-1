@@ -282,8 +282,8 @@ void Model::render(ID3D11DeviceContext *context) {
 	effect->bindPipeline(context);
 
 	//// set  shaders for effect
-	//context->VSSetShader(effect->getVertexShader(), 0, 0);
-	//context->PSSetShader(effect->getPixelShader(), 0, 0);
+	context->VSSetShader(effect->getVertexShader(), 0, 0);
+	context->PSSetShader(effect->getPixelShader(), 0, 0);
 
 	// Validate Model before rendering (see notes in constructor)
 	if (!context || !vertexBuffer || !indexBuffer || !effect)

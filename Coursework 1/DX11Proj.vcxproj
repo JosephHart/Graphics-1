@@ -149,6 +149,9 @@
     <ClCompile Include="Source\Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="per_pixel_lighting_grass_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\hlsl\basic_colour_gs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
     </FxCompile>

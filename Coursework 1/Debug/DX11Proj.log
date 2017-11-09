@@ -1,8 +1,10 @@
-﻿  Grid.cpp
-c:\users\joeis\documents\github\graphics-1\coursework 1\source\grid.cpp(27): warning C4018: '<' : signed/unsigned mismatch
-c:\users\joeis\documents\github\graphics-1\coursework 1\source\grid.cpp(29): warning C4018: '<' : signed/unsigned mismatch
-c:\users\joeis\documents\github\graphics-1\coursework 1\source\grid.cpp(32): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-c:\users\joeis\documents\github\graphics-1\coursework 1\source\grid.cpp(33): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-c:\users\joeis\documents\github\graphics-1\coursework 1\source\grid.cpp(63): warning C4018: '<' : signed/unsigned mismatch
-c:\users\joeis\documents\github\graphics-1\coursework 1\source\grid.cpp(65): warning C4018: '<' : signed/unsigned mismatch
+﻿  Scene.cpp
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(390): warning C4305: 'argument' : truncation from 'double' to 'float'
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(420): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(572): warning C4244: '=' : conversion from 'FLOAT' to 'UINT', possible loss of data
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(573): warning C4244: '=' : conversion from 'FLOAT' to 'UINT', possible loss of data
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(632): warning C4305: 'argument' : truncation from 'double' to 'float'
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(633): warning C4305: 'argument' : truncation from 'double' to 'float'
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(745): warning C4305: 'argument' : truncation from 'double' to 'float'
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(765): warning C4244: 'argument' : conversion from 'gu_seconds' to 'float', possible loss of data
   DX11Proj.vcxproj -> C:\Users\joeis\Documents\GitHub\Graphics-1\Coursework 1\Debug\DX11Proj.exe

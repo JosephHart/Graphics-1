@@ -127,7 +127,6 @@ Grid::Grid(UINT widthl, UINT heightl, ID3D11Device *device, Effect *_effect, ID3
 }
 
 
-
 Grid::~Grid() {
 
 	if (vertexBuffer)

@@ -289,5 +289,8 @@
     <FxCompile Include="Shaders\hlsl\basic_texture_vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="per_pixel_lighting_grass_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

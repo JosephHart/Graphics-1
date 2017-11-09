@@ -502,8 +502,7 @@ HRESULT Scene::initialiseSceneResources() {
 	cubeTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	cubeTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	cubeTexDesc.CPUAccessFlags = 0;
-	cubeTexDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS |
-		D3D11_RESOURCE_MISC_TEXTURECUBE;
+	cubeTexDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS |	D3D11_RESOURCE_MISC_TEXTURECUBE;
 	ID3D11Texture2D* cubeTex = 0;
 	HRESULT hr(device->CreateTexture2D(&cubeTexDesc, 0, &cubeTex));
 
@@ -604,7 +603,7 @@ HRESULT Scene::initialiseSceneResources() {
 	srvDesc.Format = texDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MipLevels = 0;
 
 	hr = device->CreateShaderResourceView(renderTargetTexture, &srvDesc, &renderTargetSRV);
 
@@ -614,6 +613,7 @@ HRESULT Scene::initialiseSceneResources() {
 	// Setup objects for the programmable (shader) stages of the pipeline
 
 	perPixelLightingEffect = new Effect(device, "Shaders\\cso\\per_pixel_lighting_vs.cso", "Shaders\\cso\\per_pixel_lighting_ps.cso", extVertexDesc, ARRAYSIZE(extVertexDesc));
+	perPixelLightingEffectGrass = new Effect(device, "Shaders\\cso\\per_pixel_lighting_grass_vs.cso", "Shaders\\cso\\per_pixel_lighting_ps.cso", extVertexDesc, ARRAYSIZE(extVertexDesc));
 
 	skyBoxEffect = new Effect(device, "Shaders\\cso\\sky_box_vs.cso", "Shaders\\cso\\sky_box_ps.cso", extVertexDesc, ARRAYSIZE(extVertexDesc));
 	//basicEffect = new Effect(device, "Shaders\\cso\\basic_colour_vs.cso", "Shaders\\cso\\basic_colour_ps.cso", "Shaders\\cso\\basic_colour_gs.cso", basicVertexDesc, ARRAYSIZE(basicVertexDesc));
@@ -645,20 +645,18 @@ HRESULT Scene::initialiseSceneResources() {
 	cbufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbufferInitData.pSysMem = cBufferExtSrc;
 	
-	//Create bridge CBuffer
+	//Create CBuffers
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferBridge);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferSkyBox);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferSphere);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferGrass);
-
-	dx->getDeviceContext()->PSSetShaderResources(2, 1, &grassAlphaMapSRV);
-	dx->getDeviceContext()->VSSetShaderResources(0, 1, &grassHeightMapSRV);
-	dx->getDeviceContext()->VSSetShaderResources(2, 1, &grassNormalMapSRV);
+	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferDropship);
 
 	// Setup example objects
 	//
 	mattWhite.setSpecular(XMCOLOR(0, 0, 0, 0));
 	glossWhite.setSpecular(XMCOLOR(1, 1, 1, 1));
+	midWhite.setSpecular(XMCOLOR(0.5f, 0.5f, 0.5f, 1));
 
 	brickTexture = new Texture(device, L"Resources\\Textures\\brick_DIFFUSE.jpg");
 	envMapTexture = new Texture(device, L"Resources\\Textures\\grassenvmap1024.dds");
@@ -668,18 +666,21 @@ HRESULT Scene::initialiseSceneResources() {
 	grassDiffuseMap = new Texture(device, L"Resources\\Textures\\grass.png");
 	grassNormalMap = new Texture(device, L"Resources\\Textures\\normalmap.bmp");
 	grassHeightMap = new Texture(device, L"Resources\\Textures\\heightmap1.bmp");
+	grassTex = new Texture(device, L"Resources\\Textures\\grassTex.jpg");
+	dropshipTex = new Texture(device, L"Resources\\Textures\\dropship_texture.bmp");
 
 	ID3D11ShaderResourceView *sphereTextureArray[] = { rustDiffTexture->SRV, mDynamicCubeMapSRV, rustSpecTexture->SRV };
+	ID3D11ShaderResourceView *grassTextureArray[] = { grassAlphaMap->SRV, grassDiffuseMap->SRV, grassNormalMap->SRV, grassHeightMap->SRV };
 
 	//load bridge
 	bridge = new Model(device, perPixelLightingEffect, wstring(L"Resources\\Models\\bridge.3ds"), brickTexture->SRV, &mattWhite);
-	sphere = new Model(device, refMapEffect, wstring(L"Resources\\Models\\sphere.3ds"), sphereTextureArray, 3, &glossWhite);
+	sphere = new Model(device, refMapEffect, wstring(L"Resources\\Models\\spherehighres.3ds"), sphereTextureArray, 3, &glossWhite);
+	dropship = new Model(device, perPixelLightingEffect, wstring(L"Resources\\Models\\dropship.gsf"), dropshipTex->SRV, &midWhite);
 
 	cube = new Box(device, refMapEffect, mDynamicCubeMapSRV);
 	box = new Box(device, skyBoxEffect, envMapTexture->SRV);
-	triangle = new Quad(device, basicEffect->getVSInputLayout());
 
-	floor = new Grid(100, 100, device, grassEffect, grassDiffuseMap->SRV, &mattWhite);
+	floor = new Grid(100, 100, device, perPixelLightingEffectGrass, grassTex->SRV, &mattWhite);
 
 	BuildCubeFaceCamera(0, 0, 0);
 	return S_OK;
@@ -751,7 +752,7 @@ HRESULT Scene::updateScene(ID3D11DeviceContext *context, Camera *camera) {
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferSkyBox);
 
-	cBufferExtSrc->worldMatrix = XMMatrixScaling(1, 1, 1)*XMMatrixTranslation(0, 0, 0)*XMMatrixRotationX(tDelta);
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(1, 1, 1)*XMMatrixTranslation(0, 0, 0);//*XMMatrixRotationY(tDelta);
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferSphere);
@@ -760,7 +761,11 @@ HRESULT Scene::updateScene(ID3D11DeviceContext *context, Camera *camera) {
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferGrass);
-	cBufferExtSrc->grassHeight = (grassLength / numGrassPasses) * numGrassPasses;
+
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(2, 2, 2)*XMMatrixTranslation(20, 10, 0)*XMMatrixRotationY(-tDelta/4);
+	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+	mapCbuffer(cBufferExtSrc, cBufferDropship);
 
 	return S_OK;
 }
@@ -871,21 +876,20 @@ HRESULT Scene::renderSceneElements(ID3D11DeviceContext *context)
 		box->render(context);
 	}
 
-	// Set ground vertex and pixel shaders
-	context->VSSetShader(grassEffect->getVertexShader(), 0, 0);
-	context->PSSetShader(grassEffect->getPixelShader(), 0, 0);
-
-	// Draw the Grass
 	if (floor) {
-
+		// Apply the box cBuffer.
+		context->VSSetConstantBuffers(0, 1, &cBufferGrass);
+		context->PSSetConstantBuffers(0, 1, &cBufferGrass);
 		// Render
-		for (int i = 0; i < numGrassPasses; i++)
-		{
-			//// Apply the cBuffer.
-			context->VSSetConstantBuffers(0, 1, &cBufferGrass);
-			context->PSSetConstantBuffers(0, 1, &cBufferGrass);
-			floor->render(context);
-		}
+		floor->render(context);
+	}
+
+	if (dropship) {
+		// Apply the box cBuffer.
+		context->VSSetConstantBuffers(0, 1, &cBufferDropship);
+		context->PSSetConstantBuffers(0, 1, &cBufferDropship);
+		// Render
+		dropship->render(context);
 	}
 
 	return S_OK;

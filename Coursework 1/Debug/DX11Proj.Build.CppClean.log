@@ -10,6 +10,7 @@ c:\users\joeis\documents\github\graphics-1\coursework 1\debug\cgdconsole.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxvertexbasic.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxvertexext.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\particles.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\scene.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxsystem.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\cgdclock.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\gumemory.obj
@@ -18,6 +19,7 @@ c:\users\joeis\documents\github\graphics-1\coursework 1\debug\main.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\material.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\mesh.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\quad.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\terrain.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\texture.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\triangle.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\animation.obj
@@ -25,6 +27,7 @@ c:\users\joeis\documents\github\graphics-1\coursework 1\debug\box.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\camera.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dxbasemodel.obj
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\grid.obj
+c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\per_pixel_lighting_grass_vs.cso
 c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_gs.cso
 c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_ps.cso
 c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\basic_colour_vs.cso
@@ -50,6 +53,9 @@ c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\per_pixel_li
 c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\per_pixel_lighting_vs.cso
 c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\tree_ps.cso
 c:\users\joeis\documents\github\graphics-1\coursework 1\shaders\cso\tree_vs.cso
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.ilk
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.exe
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.pdb
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.command.1.tlog
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.read.1.tlog
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\cl.write.1.tlog
@@ -57,3 +63,6 @@ c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\dx11
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.command.1.tlog
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.read.1.tlog
 c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\fxc.write.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.command.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.read.1.tlog
+c:\users\joeis\documents\github\graphics-1\coursework 1\debug\dx11proj.tlog\link.write.1.tlog
