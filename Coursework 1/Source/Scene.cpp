@@ -323,30 +323,36 @@ void Scene::reportTimingData() {
 // Process mouse move with the left button held down
 void Scene::handleMouseLDrag(const POINT &disp) {
 	//LookAtCamera
-	mainCamera->rotateElevation((float)-disp.y * 0.01f);
-	mainCamera->rotateOnYAxis((float)-disp.x * 0.01f);
+	//mainCamera->rotateElevation((float)-disp.y * 0.01f);
+	//mainCamera->rotateOnYAxis((float)-disp.x * 0.01f);
 
 	//FirstPersonCamera
-	//mainCamera->elevate((float)-disp.y * 0.01f);
-	//mainCamera->turn((float)-disp.x * 0.01f);
+	mainCamera->elevate((float)-disp.y * 0.01f);
+	mainCamera->turn((float)-disp.x * 0.01f);
 }
 
 // Process mouse wheel movement
 void Scene::handleMouseWheel(const short zDelta) {
 
 	//LookAtCamera
-	if (zDelta<0)
-		mainCamera->zoomCamera(1.2f);
-	else if (zDelta>0)
-		mainCamera->zoomCamera(0.9f);
+	//if (zDelta<0)
+		//mainCamera->zoomCamera(1.2f);
+	//else if (zDelta>0)
+		//mainCamera->zoomCamera(0.9f);
 	//FirstPersonCamera
-	//mainCamera->move(zDelta*0.01);
+	mainCamera->move(zDelta*0.01);
 }
 
 // Process key down event.  keyCode indicates the key pressed while extKeyFlags indicates the extended key status at the time of the key down event (see http://msdn.microsoft.com/en-gb/library/windows/desktop/ms646280%28v=vs.85%29.aspx).
 void Scene::handleKeyDown(const WPARAM keyCode, const LPARAM extKeyFlags) {
 
-	// Add key down handler here...
+	switch (keyCode)
+	{
+		case VK_SPACE:
+			if (dancingBushes == true) dancingBushes = false;
+			else dancingBushes = true;
+			break;
+	}
 }
 
 // Process key up event.  keyCode indicates the key released while extKeyFlags indicates the extended key status at the time of the key up event (see http://msdn.microsoft.com/en-us/library/windows/desktop/ms646281%28v=vs.85%29.aspx).
@@ -359,7 +365,7 @@ void Scene::handleKeyUp(const WPARAM keyCode, const LPARAM extKeyFlags) {
 // Methods to handle initialisation, update and rendering of the scene
 //
 
-HRESULT Scene::rebuildViewport(Camera *camera){
+HRESULT Scene::rebuildViewport(FirstPersonCamera *camera){
 	// Binds the render target view and depth/stencil view to the pipeline.
 	// Sets up viewport for the main window (wndHandle) 
 	// Called at initialisation or in response to window resize
@@ -478,7 +484,7 @@ HRESULT Scene::initialiseSceneResources() {
 
 	// Create main camera
 	//
-	mainCamera = new LookAtCamera();
+	mainCamera = new FirstPersonCamera();
 	mainCamera->setPos(XMVectorSet(25, 2, -14.5, 1));
 
 	rebuildViewport(mainCamera);
@@ -598,14 +604,29 @@ HRESULT Scene::initialiseSceneResources() {
 
 	hr = device->CreateRenderTargetView(renderTargetTexture, &rtvDesc, &renderTargetRTV);
 
-	//Create shader resource view
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = texDesc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 0;
+	//Geometry Shader Stuff
+	//////////////////////////////
 
-	hr = device->CreateShaderResourceView(renderTargetTexture, &srvDesc, &renderTargetSRV);
+	////Create shader resource view
+	//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	//srvDesc.Format = texDesc.Format;
+	//srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	//srvDesc.Texture2D.MostDetailedMip = 0;
+	//srvDesc.Texture2D.MipLevels = 0;
+
+	//hr = device->CreateShaderResourceView(renderTargetTexture, &srvDesc, &renderTargetSRV);
+
+	//// Create the 6-face render target view
+	//D3D11_RENDER_TARGET_VIEW_DESC DescRT;
+	//DescRT.Format = dsvDesc.Format;
+	//DescRT.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+	//DescRT.Texture2DArray.FirstArraySlice = 0;
+	//DescRT.Texture2DArray.ArraySize = 6;
+	//DescRT.Texture2DArray.MipSlice = 0;
+	//device->CreateRenderTargetView(renderTargetTexture, &DescRT, &renderTargetRTV);
+
+	//ID3D11RenderTargetView* aRTViews[1] = { renderTargetRTV };
+	//context->OMSetRenderTargets(sizeof(aRTViews) / sizeof(aRTViews[0]),	aRTViews, mDynamicCubeMapDSV);
 
 	// View saves reference.
 	renderTargetTexture->Release();
@@ -633,6 +654,16 @@ HRESULT Scene::initialiseSceneResources() {
 	cBufferExtSrc->lightDiffuse = XMFLOAT4(0.8, 0.8, 0.8, 1.0);
 	cBufferExtSrc->lightSpecular = XMFLOAT4(1.0, 1.0, 1.0, 1.0);
 
+	cBufferExtSrc->lightVec2 = XMFLOAT4(250.0, 130.0, 145.0, 1.0); // Positional light
+	cBufferExtSrc->lightAmbient2 = XMFLOAT4(0.1, 0.3, 0.3, 1.0);
+	cBufferExtSrc->lightDiffuse2 = XMFLOAT4(0.1, 0.4, 0.3, 1.0);
+	cBufferExtSrc->lightSpecular2 = XMFLOAT4(1.0, 1.0, 1.0, 1.0);
+
+	cBufferExtSrc->lightVec3 = XMFLOAT4(-20.0, 20.0, 20.0, 0.0); // Spot light
+	cBufferExtSrc->lightAmbient3 = XMFLOAT4(0.1, 0.05, 0.1, 1.0);
+	cBufferExtSrc->lightDiffuse3 = XMFLOAT4(0.2, 0.1, 0.2, 1.0);
+	cBufferExtSrc->lightSpecular3 = XMFLOAT4(1.0, 1.0, 1.0, 1.0);
+
 	XMStoreFloat4(&cBufferExtSrc->eyePos, mainCamera->getPos());// camera->pos;
 
 	D3D11_BUFFER_DESC cbufferDesc;
@@ -651,6 +682,10 @@ HRESULT Scene::initialiseSceneResources() {
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferSphere);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferGrass);
 	hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferDropship);
+	for (int i = 0; i < 40; i++)
+	{
+		hr = device->CreateBuffer(&cbufferDesc, &cbufferInitData, &cBufferBush[i]);
+	}
 
 	// Setup example objects
 	//
@@ -676,11 +711,37 @@ HRESULT Scene::initialiseSceneResources() {
 	bridge = new Model(device, perPixelLightingEffect, wstring(L"Resources\\Models\\bridge.3ds"), brickTexture->SRV, &mattWhite);
 	sphere = new Model(device, refMapEffect, wstring(L"Resources\\Models\\spherehighres.3ds"), sphereTextureArray, 3, &glossWhite);
 	dropship = new Model(device, perPixelLightingEffect, wstring(L"Resources\\Models\\dropship.gsf"), dropshipTex->SRV, &midWhite);
+	bush = new Model(device, perPixelLightingEffect, wstring(L"Resources\\Models\\Bush.3ds"), grassDiffuseMap->SRV, &mattWhite);
 
 	cube = new Box(device, refMapEffect, mDynamicCubeMapSRV);
 	box = new Box(device, skyBoxEffect, envMapTexture->SRV);
 
 	floor = new Grid(100, 100, device, perPixelLightingEffectGrass, grassTex->SRV, &mattWhite);
+
+	//bush positions
+	for (int i = 0; i < 40; i++)
+	{
+		if (i < 10)
+		{
+			bushPosX[i] = 50;
+			bushPosZ[i] = 50 - (i * 10);
+		}
+		else if (i < 20)
+		{
+			bushPosX[i] = 50 - ((i-10) * 10);
+			bushPosZ[i] = -50;
+		}
+		else if (i < 30)
+		{
+			bushPosX[i] = -50;
+			bushPosZ[i] = -50 + ((i - 20) * 10);
+		}
+		else if (i < 40)
+		{
+			bushPosX[i] = -50 + ((i - 30) * 10);
+			bushPosZ[i] = 50;
+		}
+	}
 
 	BuildCubeFaceCamera(0, 0, 0);
 	return S_OK;
@@ -766,6 +827,76 @@ HRESULT Scene::updateScene(ID3D11DeviceContext *context, Camera *camera) {
 	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
 	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
 	mapCbuffer(cBufferExtSrc, cBufferDropship);
+
+	int height = 0;
+
+	if (dancingBushes == true)
+	{
+		height = tDelta;
+	}
+
+	for (int i = 0; i < 40; i++)
+	{
+		cBufferExtSrc->worldMatrix = XMMatrixScaling(0.5, 0.5, 0.5)*XMMatrixTranslation(bushPosX[i]+50, height, bushPosZ[i]);
+		cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+		cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+		mapCbuffer(cBufferExtSrc, cBufferBush[i]);
+	}
+
+	return S_OK;
+}
+
+// Update scene state (perform animations etc)
+HRESULT Scene::updateScene(ID3D11DeviceContext *context, FirstPersonCamera *camera) {
+
+	mainClock->tick();
+	gu_seconds tDelta = mainClock->gameTimeElapsed();
+
+	cBufferExtSrc->Timer = (FLOAT)tDelta;
+	XMStoreFloat4(&cBufferExtSrc->eyePos, camera->getPos());
+
+	// Update bridge cBuffer
+	// Scale and translate bridge world matrix
+
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(0.05, 0.05, 0.05)*XMMatrixTranslation(0, -2, 12);
+	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+	mapCbuffer(cBufferExtSrc, cBufferBridge);
+
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(1000, 1000, 1000)*XMMatrixTranslation(0, 0, 0);
+	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+	mapCbuffer(cBufferExtSrc, cBufferSkyBox);
+
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(1, 1, 1)*XMMatrixTranslation(0, 0, 0);//*XMMatrixRotationY(tDelta); // commented out due to edge issues
+	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+	mapCbuffer(cBufferExtSrc, cBufferSphere);
+
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(1, 1, 1)*XMMatrixTranslation(-50, -2, -50);
+	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+	mapCbuffer(cBufferExtSrc, cBufferGrass);
+
+	cBufferExtSrc->worldMatrix = XMMatrixScaling(2, 2, 2)*XMMatrixTranslation(20, 10, 0)*XMMatrixRotationY(-tDelta / 4);
+	cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+	cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+	mapCbuffer(cBufferExtSrc, cBufferDropship);
+
+	int height = 0;
+
+	if (dancingBushes == true)
+	{
+		height = tDelta;
+	}
+
+	for (int i = 0; i < 40; i++)
+	{
+		cBufferExtSrc->worldMatrix = XMMatrixScaling(0.5, 0.5, 0.5)*XMMatrixTranslation(bushPosX[i]+50, height, bushPosZ[i]);
+		cBufferExtSrc->worldITMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, cBufferExtSrc->worldMatrix));
+		cBufferExtSrc->WVPMatrix = cBufferExtSrc->worldMatrix*camera->getViewMatrix()*camera->getProjMatrix();
+		mapCbuffer(cBufferExtSrc, cBufferBush[i]);
+	}
 
 	return S_OK;
 }
@@ -890,6 +1021,17 @@ HRESULT Scene::renderSceneElements(ID3D11DeviceContext *context)
 		context->PSSetConstantBuffers(0, 1, &cBufferDropship);
 		// Render
 		dropship->render(context);
+	}
+
+	for (int i = 0; i < 40; i++)
+	{
+		if (bush) {
+			// Apply the box cBuffer.
+			context->VSSetConstantBuffers(0, 1, &cBufferBush[i]);
+			context->PSSetConstantBuffers(0, 1, &cBufferBush[i]);
+			// Render
+			bush->render(context);
+		}
 	}
 
 	return S_OK;

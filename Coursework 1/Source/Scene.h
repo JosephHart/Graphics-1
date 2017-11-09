@@ -52,6 +52,7 @@ class Scene : public GUObject {
 	ID3D11Buffer							*cBufferSphere = nullptr;
 	ID3D11Buffer							*cBufferGrass = nullptr;
 	ID3D11Buffer							*cBufferDropship = nullptr;
+	ID3D11Buffer							*cBufferBush[40];
 	CBufferExt								*cBufferExtSrc = nullptr;
 
 	//Textures
@@ -89,13 +90,18 @@ class Scene : public GUObject {
 	Box										*cube = nullptr;
 	Grid									*floor = nullptr;
 	Model									*dropship = nullptr;
+	Model									*bush = nullptr;
+
+	float									bushPosX[40];
+	float									bushPosZ[40];
+	bool									dancingBushes = false;
 
 	// Main FPS clock
 	CGDClock								*mainClock = nullptr;
 
 	//Camera
-	//FirstPersonCamera						*mainCamera = nullptr;
-	LookAtCamera							*mainCamera = nullptr;
+	FirstPersonCamera						*mainCamera = nullptr;
+	//LookAtCamera							*mainCamera = nullptr;
 	Camera									mCubeMapCamera[6];
 
 	//Variables
@@ -158,7 +164,7 @@ public:
 	//
 	// Methods to handle initialisation, update and rendering of the scene
 	//
-	HRESULT rebuildViewport(Camera *camera);
+	HRESULT rebuildViewport(FirstPersonCamera *camera);
 	HRESULT rebuildReflectiveViewport(Camera *camera);
 	HRESULT initDefaultPipeline();
 	HRESULT bindDefaultPipeline();
@@ -167,6 +173,7 @@ public:
 	HRESULT initialiseSceneResources();
 	void BuildCubeFaceCamera(float x, float y, float z);
 	HRESULT updateScene(ID3D11DeviceContext *context, Camera *camera);
+	HRESULT Scene::updateScene(ID3D11DeviceContext *context, FirstPersonCamera *camera);
 	HRESULT renderScene();
 	HRESULT renderSceneElements(ID3D11DeviceContext *context);
 

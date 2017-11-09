@@ -25,6 +25,14 @@ cbuffer basicCBuffer : register(b0) {
 	float4				lightAmbient;
 	float4				lightDiffuse;
 	float4				lightSpecular;
+	float4				lightVec2; // w=1: Vec represents position, w=0: Vec  represents direction.
+	float4				lightAmbient2;
+	float4				lightDiffuse2;
+	float4				lightSpecular2;
+	float4				lightVec3; // w=1: Vec represents position, w=0: Vec  represents direction.
+	float4				lightAmbient3;
+	float4				lightDiffuse3;
+	float4				lightSpecular3;
 	float4				windDir;
 	float				Timer;
 	float				grassHeight;
@@ -82,23 +90,40 @@ FragmentOutputPacket main(FragmentInputPacket v) {
 	baseColour = baseColour * myTexture.Sample(linearSampler, v.texCoord);
 
 	//Initialise returned colour to ambient component
-	float3 colour = baseColour.xyz* lightAmbient;
+	float3 colour = baseColour.xyz* (lightAmbient + lightAmbient2 + lightAmbient3);
 
 	// Calculate the lambertian term (essentially the brightness of the surface point based on the dot product of the normal vector with the vector pointing from v to the light source's location)
 	float3 lightDir = -lightVec.xyz; // Directional light
 	if (lightVec.w == 1.0) lightDir =lightVec.xyz - v.posW; // Positional light
 	lightDir=normalize(lightDir);
 
+	float3 lightDir2 = -lightVec2.xyz; // Directional light
+	if (lightVec2.w == 1.0) lightDir2 = lightVec2.xyz - v.posW; // Positional light
+	lightDir2 = normalize(lightDir2);
+
+	float3 lightDir3 = -lightVec3.xyz; // Directional light
+	if (lightVec3.w == 1.0) lightDir3 = lightVec3.xyz - v.posW; // Positional light
+	lightDir3 = normalize(lightDir3);
+
 	// Add diffuse light if relevant (otherwise we end up just returning the ambient light colour)
-	colour += max(dot(lightDir, N), 0.0f) *baseColour.xyz * lightDiffuse;
+	colour += max(dot(lightDir, N), 0.0f) * baseColour.xyz * lightDiffuse;
+	colour += max(dot(lightDir2, N), 0.0f) * baseColour.xyz * lightDiffuse2;
+	colour += max(dot(lightDir3, N), 0.0f) * baseColour.xyz * lightDiffuse3;
 
 	// Calc specular light
 	float specPower = max(v.matSpecular.a*1000.0, 1.0f);
 
 	float3 eyeDir = normalize(eyePos - v.posW);
 	float3 R = reflect(-lightDir,N );
+	float3 R2 = reflect(-lightDir2, N);
+	float3 R3 = reflect(-lightDir3, N);
 	float specFactor = pow(max(dot(R, eyeDir), 0.0f), specPower);
+	float specFactor2 = pow(max(dot(R2, eyeDir), 0.0f), specPower);
+	float specFactor3 = pow(max(dot(R3, eyeDir), 0.0f), specPower);
 	colour += specFactor * v.matSpecular.xyz * lightSpecular;
+	colour += specFactor2 * v.matSpecular.xyz * lightSpecular2;
+	colour += specFactor3 * v.matSpecular.xyz * lightSpecular3;
+
 
 	outputFragment.fragmentColour = float4(colour,  baseColour.a);
 	return outputFragment;

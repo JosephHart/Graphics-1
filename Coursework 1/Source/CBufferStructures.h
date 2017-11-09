@@ -13,6 +13,18 @@ __declspec(align(16)) struct CBufferExt  {
 	DirectX::XMFLOAT4						lightDiffuse;
 	DirectX::XMFLOAT4						lightSpecular;
 
+	//Light 2
+	DirectX::XMFLOAT4						lightVec2; // w=1: Vec represents position, w=0: Vec  represents direction.
+	DirectX::XMFLOAT4						lightAmbient2;
+	DirectX::XMFLOAT4						lightDiffuse2;
+	DirectX::XMFLOAT4						lightSpecular2;
+
+	//Light 3
+	DirectX::XMFLOAT4						lightVec3; // w=1: Vec represents position, w=0: Vec  represents direction.
+	DirectX::XMFLOAT4						lightAmbient3;
+	DirectX::XMFLOAT4						lightDiffuse3;
+	DirectX::XMFLOAT4						lightSpecular3;
+
 	// from terrain tutorial
 	DirectX::XMFLOAT4						windDir;
 	// Simple single light source properties

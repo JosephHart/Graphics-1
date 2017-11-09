@@ -17,6 +17,14 @@ cbuffer basicCBuffer : register(b0) {
 	float4				lightAmbient;
 	float4				lightDiffuse;
 	float4				lightSpecular;
+	float4				lightVec2; // w=1: Vec represents position, w=0: Vec  represents direction.
+	float4				lightAmbient2;
+	float4				lightDiffuse2;
+	float4				lightSpecular2;
+	float4				lightVec3; // w=1: Vec represents position, w=0: Vec  represents direction.
+	float4				lightAmbient3;
+	float4				lightDiffuse3;
+	float4				lightSpecular3;
 	float4				windDir;
 	float				Timer;
 	float				grassHeight;
