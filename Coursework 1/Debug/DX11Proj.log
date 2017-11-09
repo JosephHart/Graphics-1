@@ -6,5 +6,6 @@ c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(573): w
 c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(632): warning C4305: 'argument' : truncation from 'double' to 'float'
 c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(633): warning C4305: 'argument' : truncation from 'double' to 'float'
 c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(745): warning C4305: 'argument' : truncation from 'double' to 'float'
+c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(755): warning C4244: 'argument' : conversion from 'gu_seconds' to 'float', possible loss of data
 c:\users\joeis\documents\github\graphics-1\coursework 1\source\scene.cpp(765): warning C4244: 'argument' : conversion from 'gu_seconds' to 'float', possible loss of data
   DX11Proj.vcxproj -> C:\Users\joeis\Documents\GitHub\Graphics-1\Coursework 1\Debug\DX11Proj.exe
